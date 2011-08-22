@@ -43,7 +43,8 @@
 #define VFD_BRIGHTNESS100 0x00
 
 #define VFD_SPICOMMAND 0xF8
-#define VFD_SPIWRITE 0xFA
+#define VFD_SPIDATAWRITE 0xFA
+#define VFD_SPIDATAREAD 0xFE
 #define VFD_SPIADDREAD 0xFC
 
 class SPI_VFD : public Print {
@@ -75,20 +76,20 @@ public:
     void setCursor(uint8_t, uint8_t); 
     virtual void write(uint8_t);
     virtual uint8_t read_addr();
-        void command(uint8_t);
-    private:
-        inline void send(uint8_t data);
-        inline uint8_t recv();
+	void command(uint8_t);
+private:
+	inline void send(uint8_t data);
+	inline uint8_t recv();
         
-        uint8_t _clock, _data, _strobe;  // SPI interface
+	uint8_t _clock, _data, _strobe;  // SPI interface
         
-        uint8_t _displayfunction;
-        uint8_t _displaycontrol;
-        uint8_t _displaymode;
+	uint8_t _displayfunction;
+	uint8_t _displaycontrol;
+	uint8_t _displaymode;
         
-        uint8_t _initialized;
+	uint8_t _initialized;
         
-        uint8_t _numlines, _currline;
-    };
+	uint8_t _numlines, _currline;
+};
     
 #endif

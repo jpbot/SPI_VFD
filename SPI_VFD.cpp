@@ -219,19 +219,20 @@ void SPI_VFD::write(uint8_t value) {
         ready=read_addr();
         
         // only care about BF, which is MSB
-        ready>>=7;
+        Serial.print(ready, DEC); Serial.print("\t MSB: ");
+		ready>>=7;
+		Serial.println(ready, DEC);
     } while (ready);
     
     digitalWrite(_strobe, LOW);
-    send(VFD_SPIWRITE);
+    send(VFD_SPIDATAWRITE);
     send(value);
     digitalWrite(_strobe, HIGH);
     
-    /*
-     Serial.print(VFD_SPIWRITE, HEX);
-     Serial.print('\t');
-     Serial.println(value, HEX);
-     */
+	Serial.print("W");
+	Serial.print(VFD_SPIDATAWRITE, HEX);
+	Serial.print('\t');
+	Serial.println(value, HEX);
 }
 
 uint8_t SPI_VFD::read_addr() {
@@ -243,11 +244,11 @@ uint8_t SPI_VFD::read_addr() {
     value=recv();
     digitalWrite(_strobe, HIGH);
     
-    /*
-     Serial.print(VFD_SPIADDREAD, HEX);
-     Serial.print('\t');
-     Serial.println(value, HEX);
-     */
+    Serial.print("R");
+	Serial.print(VFD_SPIADDREAD, HEX);
+	Serial.print('\t');
+	Serial.println(value, HEX);
+     
     
     return value;
 }
@@ -275,7 +276,8 @@ inline void SPI_VFD::send(uint8_t c) {
 
 // read spi data
 inline uint8_t SPI_VFD::recv() {
-    int8_t i,c;
+    int8_t i;
+	int8_t c = 0;
     
     digitalWrite(_clock, HIGH);
     
@@ -283,7 +285,7 @@ inline uint8_t SPI_VFD::recv() {
         // pull clock low
         digitalWrite(_clock, LOW);
         // read next value from display
-        c=digitalRead(_data);
+        c = digitalRead(_data);
         // make room for next value
         if (i) {
             c<<=1;
