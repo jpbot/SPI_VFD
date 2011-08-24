@@ -48,7 +48,7 @@ void SPI_VFD::begin(uint8_t cols, uint8_t lines, uint8_t brightness) {
     else
         _displayfunction = VFD_1LINE;
     
-    if (brightness>VFD_BRIGHTNESS25)	//catch bad values
+    if (brightness>VFD_BRIGHTNESS25)    //catch bad values
         brightness = VFD_BRIGHTNESS100;
     
     // set the brightness and push the linecount with VFD_SETFUNCTION
@@ -191,7 +191,7 @@ void SPI_VFD::command(uint8_t value) {
         ready=read_addr();
         
         // only care about BF, which is MSB
-		ready>>=7;
+        ready>>=7;
     } while (ready);
     
     digitalWrite(_strobe, LOW);
@@ -215,7 +215,7 @@ void SPI_VFD::write(uint8_t value) {
         ready=read_addr();
         
         // only care about BF, which is MSB
-		ready>>=7;
+        ready>>=7;
     } while (ready);
     
     digitalWrite(_strobe, LOW);
@@ -223,11 +223,11 @@ void SPI_VFD::write(uint8_t value) {
     send(value);
     digitalWrite(_strobe, HIGH);
     
-	/*
-	 Serial.print(VFD_SPIDATAWRITE, HEX);
-	 Serial.print('\t');
-	 Serial.println(value, HEX);
-	 */
+    /*
+     Serial.print(VFD_SPIDATAWRITE, HEX);
+     Serial.print('\t');
+     Serial.println(value, HEX);
+     */
 }
 
 uint8_t SPI_VFD::read_addr() {
@@ -238,10 +238,10 @@ uint8_t SPI_VFD::read_addr() {
     value=recv();
     digitalWrite(_strobe, HIGH);
     
-	/*
-	 Serial.print(VFD_SPIADDREAD, HEX);
-	 Serial.print('\t');
-	 Serial.println(value, HEX);
+    /*
+     Serial.print(VFD_SPIADDREAD, HEX);
+     Serial.print('\t');
+     Serial.println(value, HEX);
      */
     
     return value;
@@ -271,18 +271,18 @@ inline void SPI_VFD::send(uint8_t c) {
 // read spi data
 inline uint8_t SPI_VFD::recv() {
     int8_t i, c;
-	
-	pinMode(_data, INPUT);
+    
+    pinMode(_data, INPUT);
     digitalWrite(_clock, HIGH);
     
     c = 0;
 
-	for (i=7; i>=0; i--) {
+    for (i=7; i>=0; i--) {
         // pull clock low
         digitalWrite(_clock, LOW);
 
         // make room for next value
-		c <<= 1;
+        c <<= 1;
 
         // read next value from display
         c |= digitalRead(_data);
@@ -291,7 +291,7 @@ inline uint8_t SPI_VFD::recv() {
         digitalWrite(_clock, HIGH);
     }
 
-	pinMode(_data, OUTPUT);
-	
-	return c;
+    pinMode(_data, OUTPUT);
+    
+    return c;
 }
