@@ -23,7 +23,8 @@
 // can't assume that its in that state when a sketch starts (and the
 // SPI_VFD constructor is called).
 
-SPI_VFD::SPI_VFD(uint8_t data, uint8_t clock, uint8_t strobe, uint8_t brightness) {
+SPI_VFD::SPI_VFD(uint8_t data, uint8_t clock, uint8_t strobe, uint8_t brightness)
+{
     _clock = clock;
     _data = data;
     _strobe = strobe;
@@ -47,7 +48,7 @@ void SPI_VFD::begin(uint8_t cols, uint8_t lines, uint8_t brightness) {
     else
         _displayfunction = VFD_1LINE;
     
-    if (brightness>VFD_BRIGHTNESS25)    //catch bad values
+    if (brightness>VFD_BRIGHTNESS25)	//catch bad values
         brightness = VFD_BRIGHTNESS100;
     
     // set the brightness and push the linecount with VFD_SETFUNCTION
@@ -72,7 +73,7 @@ void SPI_VFD::begin(uint8_t cols, uint8_t lines, uint8_t brightness) {
 }
 
 /********** high level commands, for the user! */
-void SPI_VFD::setBrightness(uint8_t brightness) {
+void SPI_VFD::setBrightness(uint8_t brightness){
     // set the brightness (only if a valid value is passed
     if (brightness <= VFD_BRIGHTNESS25) {
         _displayfunction &= ~VFD_BRIGHTNESS25;
@@ -82,20 +83,23 @@ void SPI_VFD::setBrightness(uint8_t brightness) {
     }
 }
 
-uint8_t SPI_VFD::getBrightness() {
+uint8_t SPI_VFD::getBrightness(){
     // get the brightness
     return _displayfunction & VFD_BRIGHTNESS25;
 }
 
-void SPI_VFD::clear() {
+void SPI_VFD::clear()
+{
     command(VFD_CLEARDISPLAY);  // clear display, set cursor position to zero
 }
 
-void SPI_VFD::home() {
+void SPI_VFD::home()
+{
     command(VFD_RETURNHOME);  // set cursor position to zero
 }
 
-void SPI_VFD::setCursor(uint8_t col, uint8_t row) {
+void SPI_VFD::setCursor(uint8_t col, uint8_t row)
+{
     int row_offsets[] = { 0x00, 0x40, 0x14, 0x54 };
     if ( row > _numlines ) {
         row = _numlines-1;    // we count rows starting w/0
@@ -183,13 +187,11 @@ void SPI_VFD::command(uint8_t value) {
     
     // Wait for display to be ready
     do {
-        //Serial.print("Checking BF... ");
-        
         // check if display is ready (checking for BF=0)
         ready=read_addr();
         
         // only care about BF, which is MSB
-        ready>>=7;
+		ready>>=7;
     } while (ready);
     
     digitalWrite(_strobe, LOW);
@@ -209,15 +211,11 @@ void SPI_VFD::write(uint8_t value) {
     
     // Wait for display to be ready
     do {
-        //Serial.print("Checking BF... ");
-        
         // check if display is ready (checking for BF=0)
         ready=read_addr();
         
         // only care about BF, which is MSB
-        Serial.print(ready, DEC); Serial.print("\t MSB: ");
-        ready>>=7;
-        Serial.println(ready, DEC);
+		ready>>=7;
     } while (ready);
     
     digitalWrite(_strobe, LOW);
@@ -225,10 +223,11 @@ void SPI_VFD::write(uint8_t value) {
     send(value);
     digitalWrite(_strobe, HIGH);
     
-    Serial.print("W");
-    Serial.print(VFD_SPIDATAWRITE, HEX);
-    Serial.print('\t');
-    Serial.println(value, HEX);
+	/*
+	 Serial.print(VFD_SPIDATAWRITE, HEX);
+	 Serial.print('\t');
+	 Serial.println(value, HEX);
+	 */
 }
 
 uint8_t SPI_VFD::read_addr() {
@@ -236,15 +235,14 @@ uint8_t SPI_VFD::read_addr() {
     
     digitalWrite(_strobe, LOW);
     send(VFD_SPIADDREAD);
-    delayMicroseconds(1);
     value=recv();
     digitalWrite(_strobe, HIGH);
     
-    Serial.print("R");
-    Serial.print(VFD_SPIADDREAD, HEX);
-    Serial.print('\t');
-    Serial.println(value, HEX);
-     
+	/*
+	 Serial.print(VFD_SPIADDREAD, HEX);
+	 Serial.print('\t');
+	 Serial.println(value, HEX);
+     */
     
     return value;
 }
@@ -272,21 +270,28 @@ inline void SPI_VFD::send(uint8_t c) {
 
 // read spi data
 inline uint8_t SPI_VFD::recv() {
-    int8_t i;
-    int8_t c = 0;
-    
+    int8_t i, c;
+	
+	pinMode(_data, INPUT);
     digitalWrite(_clock, HIGH);
     
-    for (i=7; i>=0; i--) {
+    c = 0;
+
+	for (i=7; i>=0; i--) {
         // pull clock low
         digitalWrite(_clock, LOW);
-        // read next value from display
-        c = digitalRead(_data);
+
         // make room for next value
-        if (i) {
-            c<<=1;
-        }
+		c <<= 1;
+
+        // read next value from display
+        c |= digitalRead(_data);
+
         // pull clock high to prepare for next read
         digitalWrite(_clock, HIGH);
     }
+
+	pinMode(_data, OUTPUT);
+	
+	return c;
 }
